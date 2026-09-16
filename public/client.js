@@ -117,7 +117,13 @@
   }
 
   function createPeer(isInitiatorSide) {
-    pc = new RTCPeerConnection();
+    pc = new RTCPeerConnection({
+      // STUN：发现公网 IP，帮助跨 NAT 直连
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" }
+      ]
+    });
     if (isInitiatorSide) {
       hookChannel(pc.createDataChannel("chat", { ordered: true }));
     }
