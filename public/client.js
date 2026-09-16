@@ -25,7 +25,8 @@
   function connect(room) {
     roomId = room;
     logEl.innerHTML = "room: " + roomId;
-    ws = new WebSocket("ws://" + signalHost);
+    var wsProto = location.protocol === "https:" ? "wss://" : "ws://";
+    ws = new WebSocket(wsProto + signalHost);
 
     ws.onopen = function () {
       status("connecting to room...");
