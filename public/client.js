@@ -55,12 +55,12 @@
       case "peer-joined":
         // 后端已给本端发 ready（当发起方）；若还有其它情况在此由对端补充
         if (!isInitiator && !pc) {
-          createPeer();
+          createPeer(false); // 接收方：等 ondatachannel
           status("a peer joined, negotiating...");
         }
         break;
       case "offer":
-        if (!pc) createPeer();
+        if (!pc) createPeer(false); // 接收方：等 ondatachannel
         pc.setRemoteDescription(new RTCSessionDescription({ type: "offer", sdp: msg.sdp }))
           .then(function () {
             return pc.createAnswer();
@@ -93,7 +93,7 @@
 
   // 发起方：创建连接后生成并发送 SDP offer
   function startOffer() {
-    if (!pc) createPeer();
+    if (!pc) createPeer(true); // 发起方：主动建通道
     pc.createOffer()
       .then(function (offer) { return pc.setLocalDescription(offer); })
       .then(function () {
@@ -102,13 +102,20 @@
       .catch(function (e) { console.error(e); });
   }
 
-  function createPeer() {
-    pc = new RTCPeerConnection();
-    dc = pc.createDataChannel("chat", { ordered: true });
-
+  function hookChannel(ch) {
+    dc = ch;
     dc.onopen = function () { status("connected!"); };
     dc.onmessage = function (ev) { appendChat(ev.data, false); };
     dc.onclose = function () { status("data channel closed"); };
+  }
+
+  function createPeer(isInitiatorSide) {
+    pc = new RTCPeerConnection();
+    if (isInitiatorSide) {
+      hookChannel(pc.createDataChannel("chat", { ordered: true }));
+    }
+    // 接收方：通过 ondatachannel 接收发起方建的通道
+    pc.ondatachannel = function (ev) { hookChannel(ev.channel); };
 
     pc.onicecandidate = function (ev) {
       if (ev.candidate) {
