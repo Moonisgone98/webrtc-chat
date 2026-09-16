@@ -118,10 +118,14 @@
 
   function createPeer(isInitiatorSide) {
     pc = new RTCPeerConnection({
-      // STUN：发现公网 IP，帮助跨 NAT 直连
+      // STUN 发现公网地址；跨境场景下 Google STUN 国内常被墙，
+      // 故额外加国内可达的 STUN，并用免费匿名 TURN 做中继兜底（对称 NAT 时必需）
       iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" }
+        { urls: "stun:stun.l.google.com:19302" },           // 国外侧可达
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun.miwifi.com:3478" },              // 国内可达 STUN
+        { urls: "turn:openrelay.metered.ca:80" },           // 免费匿名 TURN
+        { urls: "turn:openrelay.metered.ca:443" }
       ]
     });
     if (isInitiatorSide) {
@@ -142,7 +146,14 @@
     };
 
     pc.onconnectionstatechange = function () {
-      if (pc.connectionState === "connected") status("connected!");
+      if (pc.connectionState === "connected") {
+        status("connected!");
+      } else if (pc.connectionState === "failed" || pc.connectionState === "closed") {
+        status("connection failed: " + pc.connectionState);
+        console.error("ICE fail, pc state:", pc.connectionState,
+                      "ice:", pc.iceConnectionState,
+                      "gathering:", pc.iceGatheringState);
+      }
     };
   }
 
