@@ -1,0 +1,19 @@
+# Render Blueprint 配置
+# 使用方式：在 Render 控制台 "New +" -> "Blueprint" 选择本仓库，
+# 或通过 GitHub Actions 触发部署。
+
+services:
+  - type: web
+    name: webrtc-chat
+    runtime: node
+    region: singapore          # 可改为 ohio / oregon / frankfurt 等
+    plan: free                 # Free 额度打洞后仍可用（Go/Rust 无上限，Node 有免费额度）
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /         # 静态首页即健康检查
+    autoDeploy: true           # push 到分支自动部署
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000           # Render 默认注入此端口，server.js 的 process.env.PORT 会读取
