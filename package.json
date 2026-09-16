@@ -1,0 +1,13 @@
+{
+  "name": "webrtc-chat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebRTC 无存储点对点实时聊天：信令服务器只配对不保存消息",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

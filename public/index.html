@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebRTC Chat - 无存储点对点聊天</title>
+</head>
+<body>
+  <div id="connectBox">
+    <h1>WebRTC 无存储点对点聊天</h1>
+    <p>输入一个房间号，两个标签页/设备输入相同房间号即可实时聊天。<br>
+       消息走 P2P 直连，信令服务器不保存任何聊天内容。</p>
+    <input id="roomInput" placeholder="房间号" autocomplete="off">
+    <button id="connectBtn">加入房间</button>
+  </div>
+  <div id="chatBox" style="display:none">
+    <div id="status">connecting...</div>
+    <div id="log"></div>
+    <div id="chat"></div>
+    <input id="msgInput" placeholder="输入消息..." autocomplete="off">
+    <button id="sendBtn">发送</button>
+  </div>
+  <script src="client.js"></script>
+</body>
+</html>
