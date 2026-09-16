@@ -58,11 +58,16 @@ wss.on("connection", function (ws) {
         var room = rooms.get(roomId);
         room.add(ws);
 
+        // 记录并规范化该客户端的来源 IP（去掉 IPv4 映射前缀）
+        ws.ip = (ws._socket.remoteAddress || "").replace(/^::ffff:/, "");
+
         var peers = []; room.forEach(function (c) { if (c !== ws) peers.push(c); });
-        send(ws, { type: "joined", roomId: roomId, peerCount: room.size });
+        send(ws, { type: "joined", roomId: roomId, peerCount: room.size, ip: ws.ip });
         peers.forEach(function (peer) {
-          send(peer, { type: "peer-joined", roomId: roomId });
-          send(ws, { type: "ready", roomId: roomId });
+          // 通知已有对端新加入者（携带新加入者 IP）
+          send(peer, { type: "peer-joined", roomId: roomId, ip: ws.ip });
+          // 通知新加入者作为发起方，并告知其对端 IP
+          send(ws, { type: "ready", roomId: roomId, ip: peer.ip });
         });
         break;
       }

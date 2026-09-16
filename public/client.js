@@ -6,6 +6,8 @@
   var pc;
   var dc;
   var isInitiator = false;
+  var myIp;     // 本端 IP（来自信令服务器 joined 消息）
+  var peerIp;   // 对端 IP（来自信令服务器 peer-joined / ready 消息）
   var pendingCandidates = []; // 等待 peer 连接期间的本地 ICE 候选
 
   var logEl, chatEl, msgInput, sendBtn, statusEl;
@@ -17,7 +19,9 @@
     if (!chatEl) return;
     var div = document.createElement("div");
     div.className = me ? "msg me" : "msg peer";
-    div.textContent = text;
+    // 在消息前显示发送方 IP（本端 IP / 对端 IP）
+    var sender = me ? myIp : peerIp;
+    div.textContent = "[" + (sender || (me ? "me" : "peer")) + "] " + text;
     chatEl.appendChild(div);
     chatEl.scrollTop = chatEl.scrollHeight;
   }
@@ -44,15 +48,18 @@
   function handleSignal(msg) {
     switch (msg.type) {
       case "joined":
+        if (msg.ip) myIp = msg.ip;
         if (msg.peerCount === 1) status("waiting for peer...");
         break;
       case "ready":
+        if (msg.ip) peerIp = msg.ip;
         // 已有同伴，本端作为发起方：创建连接并发起 offer
         isInitiator = true;
         startOffer();
         status("peer ready, negotiating...");
         break;
       case "peer-joined":
+        if (msg.ip) peerIp = msg.ip;
         // 后端已给本端发 ready（当发起方）；若还有其它情况在此由对端补充
         if (!isInitiator && !pc) {
           createPeer(false); // 接收方：等 ondatachannel
