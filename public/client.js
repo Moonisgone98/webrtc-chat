@@ -46,9 +46,9 @@
         if (msg.peerCount === 1) status("waiting for peer...");
         break;
       case "ready":
-        // 已有同伴，本端发起 offer
+        // 已有同伴，本端作为发起方：创建连接并发起 offer
         isInitiator = true;
-        createPeer();
+        startOffer();
         status("peer ready, negotiating...");
         break;
       case "peer-joined":
@@ -88,6 +88,17 @@
         if (pc) { pc.close(); pc = null; dc = null; }
         break;
     }
+  }
+
+  // 发起方：创建连接后生成并发送 SDP offer
+  function startOffer() {
+    if (!pc) createPeer();
+    pc.createOffer()
+      .then(function (offer) { return pc.setLocalDescription(offer); })
+      .then(function () {
+        ws.send(JSON.stringify({ type: "offer", roomId: roomId, sdp: pc.localDescription.sdp }));
+      })
+      .catch(function (e) { console.error(e); });
   }
 
   function createPeer() {
