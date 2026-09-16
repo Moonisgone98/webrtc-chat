@@ -1,11 +1,11 @@
-# 通过 Render Deploy Hook 自动部署
+﻿# 通过 Render Deploy Hook 自动部署
 # 前置：在 Render 服务页复制 Deploy Hook URL，并设为仓库 Secret：RENDER_DEPLOY_HOOK
 
 name: Deploy to Render
 
 on:
   push:
-    branches: [ master ]      # 你的默认分支是 master
+    branches: [ main ]        # 你的默认分支是 main
   workflow_dispatch:          # 允许手动触发
 
 jobs:
