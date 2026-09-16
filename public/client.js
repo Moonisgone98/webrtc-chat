@@ -119,13 +119,11 @@
   function createPeer(isInitiatorSide) {
     pc = new RTCPeerConnection({
       // STUN 发现公网地址；跨境场景下 Google STUN 国内常被墙，
-      // 故额外加国内可达的 STUN，并用免费匿名 TURN 做中继兜底（对称 NAT 时必需）
+      // 故额外加国内可达的 STUN 以保证两端的公网地址能被发现
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },           // 国外侧可达
         { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun.miwifi.com:3478" },              // 国内可达 STUN
-        { urls: "turn:openrelay.metered.ca:80" },           // 免费匿名 TURN
-        { urls: "turn:openrelay.metered.ca:443" }
+        { urls: "stun:stun.miwifi.com:3478" }               // 国内可达 STUN
       ]
     });
     if (isInitiatorSide) {
